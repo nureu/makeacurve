@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head><meta http-equiv="cache-control" content="no-cache"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="-1"><style type="text/css">body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f1f1;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.title {
+    margin-top: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+canvas {
+    border: 1px solid #000000;
+    margin-bottom: 20px;
+}
+
+.button-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+button {
+    background-color: #1e3799;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+button:hover {
+    background-color: #0c2461;
+}
+
+button:active {
+    background-color: #17202a;
+    color: #fff;
+}
+</style>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nth Degree Bezier Curve</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <h1 class="title">베지에 곡선 그리기</h1>
+    <div class="container">
+        <canvas id="bezierCanvas" width="400" height="300"></canvas>
+        <div class="button-grid">
+            <button id="drawBezierCurve">Draw Bezier Curve</button>
+            <button id="clearCanvas">Clear Canvas</button>
+            <button id="saveImage">Save Image</button>
+            <button id="copyToClipboard">Copy to Clipboard</button>
+        </div>
+    </div>
+    <script src="bezier.js"></script>
+
+<script>document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('bezierCanvas');
+    const context = canvas.getContext('2d');
+    let isDrawing = false;
+    const points = [];
+
+    // 마우스 이벤트 처리
+    canvas.addEventListener('mousedown', (event) => {
+        isDrawing = true;
+        points.push({ x: event.offsetX, y: event.offsetY });
+        context.beginPath();
+        context.moveTo(event.offsetX, event.offsetY);
+    });
+
+    canvas.addEventListener('mousemove', (event) => {
+        if (isDrawing) {
+            const x = event.offsetX;
+            const y = event.offsetY;
+            points.push({ x, y });
+            context.lineTo(x, y);
+            context.stroke();
+        }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+        isDrawing = false;
+    });
+
+    document.getElementById('drawBezierCurve').addEventListener('click', () => {
+        if (points.length < 2) {
+            alert('At least two points are required to draw a Bezier curve.');
+            return;
+        }
+
+        // Clear existing drawing
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw the Bezier curve
+        drawBezierCurve(context, points);
+
+        // Clear the points array
+        points.length = 0;
+    });
+
+    document.getElementById('clearCanvas').addEventListener('click', () => {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        points.length = 0; // Clear points array
+    });
+
+    document.getElementById('saveImage').addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = 'bezier-curve.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+
+    document.getElementById('copyToClipboard').addEventListener('click', async () => {
+        // Create a temporary canvas to draw the background
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tempContext = tempCanvas.getContext('2d');
+
+        // Fill the background with white
+        tempContext.fillStyle = '#ffffff';
+        tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+        // Draw the existing canvas content onto the temporary canvas
+        tempContext.drawImage(canvas, 0, 0);
+
+        // Copy the content from the temporary canvas
+        tempCanvas.toBlob(blob => {
+            const item = new ClipboardItem({ "image/png": blob });
+            navigator.clipboard.write([item]).then(() => {
+                alert('Image copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        });
+    });
+});
+</script></body>
