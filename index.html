@@ -185,5 +185,15 @@ button:active {
         if (num <= 1) return 1;
         return num * factorial(num - 1);
     }
+
+    // 드래그, 마우스우클릭 방지 코드 추가
+    document.addEventListener('dragstart', (event) => {
+        event.preventDefault();
+    });
+
+    document.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+    });
 });
 </script></body>
+</html>
